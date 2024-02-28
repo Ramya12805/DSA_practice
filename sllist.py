@@ -8,7 +8,7 @@ class sllist:
     def __init__(self):
         self.size=0
         self.head=self.node(None)
-
+        
     #returns the size of list     
     def listsize(self):
         return self.size
