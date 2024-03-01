@@ -5,7 +5,7 @@ def exponential_binary_search(arr, target):
 
     index = 1  # Start from 1 for effective doubling
     while index < n and arr[index - 1] <= target:
-        index *= 2
+        index *= 2 
 
     # Perform a binary search in the range [index / 2, min(index, n)]
     left, right = index // 2, min(index, n) - 1
