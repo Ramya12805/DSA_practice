@@ -191,7 +191,7 @@ class sllist:
 
         return True
     
-    #Replcaing the element in pth node with element e
+    #Replacing the element in pth node with element e
     def replace(self,p,e):
         currentnode=self.head
         index=0
@@ -201,7 +201,18 @@ class sllist:
                 break
             currentnode=currentnode.next
             index+=1
-
+    # Removing nth node from end using slow and fast poninters with constant space complexity 
+    def removeNthFromEnd(self, head, n):
+        temp=head
+        slow=temp
+        fast=temp
+        for i in range(n+1):
+            fast=fast.next
+        while fast:
+            slow=slow.next
+            fast=fast.next
+        slow.next=slow.next.next
+        return temp.next
 
 sl=sllist()
 sl.insertFirst(50)
