@@ -13,6 +13,17 @@ class sllist:
     def listsize(self):
         return self.size
     
+    def reverse(self):
+        current_node = self.head
+        prev_node = None
+
+        while current_node:
+            next_node = current_node.next
+            current_node.next = prev_node
+            prev_node = current_node
+            current_node = next_node
+
+        self.head = prev_node
     #inserts element at the first of the list 
     def insertFirst(self,data):
         newNode=self.node(data)
