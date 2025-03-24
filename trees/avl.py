@@ -7,26 +7,19 @@ class AVLTree:
             self.height=1
             self.sz=0
     def __init__(self):
-        #@start-editable@
         self.root=None
-        #@end-editable@
 
     def getHeight(self, node):
-        #@start-editable@
         if node is None:
             return
         return node.height
-        #@end-editable@
 
     def getBalance(self, node):
-        #@start-editable@
         if node is None:
             return
         return self.getHeight(node.left)-self.getHeight(node.right)
-        #@end-editable@
 
     def rightRotate(self, y):
-        #@start-editable@
         x=y.left
         T2=x.right
         x.right=y
@@ -34,10 +27,8 @@ class AVLTree:
         y.height=max(self.getHeight(y.left),self.getHeight(y.right))+1
         x.height=max(self.getHeight(x.left),self.getBalance(x.right))+1
         return x
-        #@end-editable@
 
     def leftRotate(self, x):
-        #@start-editable@
         y=x.right
         T2=y.left
         y.left=x
@@ -45,10 +36,8 @@ class AVLTree:
         x.height=max(self.getHeight(x.left),self.getHeight(x.right))+1
         y.height=max(self.getHeight(y.left),self.getHeight(y.right))+1
         return y
-        #@end-editable@
 
     def insert(self, node, element):
-        #@start-editable@
         if node is None:
             return self.Node(element)
         if element<node.element:
@@ -72,21 +61,16 @@ class AVLTree:
             return self.leftRotate(node)
         self.sz+=1
         return node
-        #@end-editable@
 
     def inOrder(self, root):
-        #@start-editable@
         if not root:
             return
         self.inOrder(root.left)
         print(root.element,end=" ")
         self.inOrder(root.right)
-        #@end-editable@
 
     def insertElement(self, element):
-        #@start-editable@
         return self.insert(self.root,element)
-        #@end-editable@
 
     def get_min_inorder(self,node):
         if node is None or node.left is None:
@@ -146,7 +130,7 @@ class AVLTree:
             if current.right:
                 queue.append(current.right)
         print()
-#@start-editable@
+
 # Driver code to demonstrate the usage of AVLTree
 if __name__ == "__main__":
     avl = AVLTree()
@@ -160,4 +144,3 @@ if __name__ == "__main__":
     avl.delete(20)
     avl.printTree()
     avl.printTree()
-#@end-editable@
