@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Nov  1 09:10:41 2023
-
-@author: vidhyas
-"""
 import math
 class BinarySearchTree:
     """
