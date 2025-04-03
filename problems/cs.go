@@ -1,42 +1,28 @@
 package main
-
-
 import (
     "fmt"
     "math/rand"
     "sync"
     "time"
 )
-
-
 type MessageType string
-
-
 const (
     REQUEST   MessageType = "REQUEST"
     REPLY     MessageType = "REPLY"
     HEARTBEAT MessageType = "HEARTBEAT"
 )
-
-
 type Message struct {
     timestamp int
     senderID  int
     typeMsg   MessageType
     priority  int // Added priority field
 }
-
-
 type ProcessState string
-
-
 const (
     IDLE       ProcessState = "IDLE"
     REQUESTING ProcessState = "REQUESTING"
     IN_CS      ProcessState = "IN-CS"
 )
-
-
 type Process struct {
     id                int
     timestamp         int
@@ -58,16 +44,12 @@ type Process struct {
     waitStart         time.Time         // When the process started waiting
     requestAttempts   int               // Number of request attempts (for exponential backoff)
 }
-
-
 var (
     processes      []*Process
     totalProcesses = 5
     rounds         = 2 // Number of CS attempts per process
     wg             sync.WaitGroup
 )
-
-
 // Initialize a new process
 func NewProcess(id int) *Process {
     p := &Process{
@@ -87,8 +69,6 @@ func NewProcess(id int) *Process {
     p.cond = sync.NewCond(&p.mutex)
     return p
 }
-
-
 // Start heartbeat sender
 func (p *Process) startHeartbeat() {
     go func() {
@@ -108,21 +88,16 @@ func (p *Process) startHeartbeat() {
     }()
 }
 
-
 // Start failure detector
 func (p *Process) startFailureDetector() {
     go func() {
         ticker := time.NewTicker(p.heartbeatInterval)
         defer ticker.Stop()
-
-
         for range ticker.C {
             p.detectFailures()
         }
     }()
 }
-
-
 // Detect failed processes based on heartbeat timeout
 func (p *Process) detectFailures() {
     p.mutex.Lock()
@@ -153,8 +128,6 @@ func (p *Process) detectFailures() {
         }
     }
 }
-
-
 // Send a request to enter the critical section
 func (p *Process) sendRequest() {
     p.mutex.Lock()
@@ -165,8 +138,6 @@ func (p *Process) sendRequest() {
     p.status = REQUESTING
     p.requestAttempts++
     p.waitStart = time.Now()
-
-
     // Start deadlock detection timer
     if p.deadlockTimeout != nil {
         p.deadlockTimeout.Stop()
@@ -176,19 +147,13 @@ func (p *Process) sendRequest() {
     if timeout > 10*time.Second {
         timeout = 10 * time.Second // Cap at 10 seconds
     }
-
-
     p.deadlockTimeout = time.AfterFunc(timeout, func() {
         p.handlePotentialDeadlock()
     })
-
-
     fmt.Printf("\n[REQUEST-START] P%d requesting CS with timestamp=%d, priority=%d\n",
         p.id, p.timestamp, p.priority)
     fmt.Printf("[REQUEST-DETAILS] P%d state=%s, clock=%d, attempt=%d\n",
         p.id, p.status, p.clock, p.requestAttempts)
-
-
     // Check for active peers
     activePeers := 0
     for _, other := range processes {
@@ -199,10 +164,7 @@ func (p *Process) sendRequest() {
     fmt.Printf("[REQUEST-PEERS] P%d found %d active peers out of %d total\n",
         p.id, activePeers, totalProcesses-1)
 
-
     p.mutex.Unlock()
-
-
     // Send REQUEST messages to all other non-failed processes
     for _, other := range processes {
         if other.id != p.id {
@@ -221,23 +183,15 @@ func (p *Process) sendRequest() {
             }
         }
     }
-
-
     // Wait for replies from all other active processes
     p.mutex.Lock()
     defer p.mutex.Unlock()
-
-
     activePeers = totalProcesses - 1 - len(p.failedProcesses)
     fmt.Printf("[REQUEST-WAIT] P%d waiting for %d replies\n", p.id, activePeers)
-
-
     for p.replyCount < activePeers {
         fmt.Printf("[REQUEST-WAIT] P%d has %d/%d replies, waiting...\n",
             p.id, p.replyCount, activePeers)
         p.cond.Wait()
-
-
         // Recalculate active peers in case more failures were detected while waiting
         newActivePeers := totalProcesses - 1 - len(p.failedProcesses)
         if newActivePeers != activePeers {
@@ -246,22 +200,16 @@ func (p *Process) sendRequest() {
             activePeers = newActivePeers
         }
     }
-
-
     // Stop deadlock detection timer
     if p.deadlockTimeout != nil {
         p.deadlockTimeout.Stop()
         p.deadlockTimeout = nil
     }
-
-
     p.status = IN_CS
     waitTime := time.Since(p.waitStart)
     fmt.Printf("[CS-ENTER] P%d entering Critical Section (waited %v)\n", p.id, waitTime)
     fmt.Printf("[CS-STATS] P%d timestamp=%d, priority=%d, replies=%d/%d\n",
         p.id, p.timestamp, p.priority, p.replyCount, activePeers)
-
-
     // Simulate work inside CS
     go func() {
         time.Sleep(time.Millisecond * 500)
@@ -327,31 +275,21 @@ func (p *Process) handlePotentialDeadlock() {
 func (p *Process) receiveMessage(msg Message) {
     p.mutex.Lock()
     defer p.mutex.Unlock()
-
-
     // Update logical clock
     oldClock := p.clock
     p.clock = max(p.clock, msg.timestamp) + 1
-
-
     // Update heartbeat timestamp
     p.lastHeartbeat[msg.senderID] = time.Now()
-
-
     // Clear failed status if previously marked as failed
     if p.failedProcesses[msg.senderID] {
         delete(p.failedProcesses, msg.senderID)
         fmt.Printf("[RECOVERY] P%d detected P%d is back online\n", p.id, msg.senderID)
     }
-
-
     switch msg.typeMsg {
     case REQUEST:
         fmt.Printf("[REQUEST-RECEIVED] P%d received REQUEST from P%d\n", p.id, msg.senderID)
         fmt.Printf("[REQUEST-DETAILS] timestamp=%d, priority=%d (my clock: %d -> %d)\n",
             msg.timestamp, msg.priority, oldClock, p.clock)
-
-
         shouldDefer := false
         deferReason := ""
 
